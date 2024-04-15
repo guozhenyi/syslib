@@ -27,17 +27,62 @@ def byte_to_str(num: int) -> str:
         return ''
 
     kb = 1024
-    mb = 1024 * 1024
-    gb = 1024 * 1024 * 1024
+    mb = kb * 1024
+    gb = mb * 1024
+    tb = gb * 1024
 
+    if num >= tb:
+        return str(round(num / gb, 1)) + 'TB' # as TiB
     if num >= gb:
-        return str(round(num / gb, 1)) + 'GB'
+        return str(round(num / gb, 1)) + 'GB' # as GiB
     if num >= mb:
-        return str(round(num / mb, 1)) + 'MB'
+        return str(round(num / mb, 1)) + 'MB' # as MiB
     if num >= kb:
-        return str(round(num / kb, 1)) + 'KB'
+        return str(round(num / kb, 1)) + 'KB' # as KiB
 
     return str(num) + 'B'
+
+def get_local_ip() -> str:
+    """获取局域网 IP
+    Returns:
+        str: _description_
+    """
+    # ip = socket.gethostbyname(socket.gethostname())
+    ip = _run("hostname -I |awk '{print $1}'").strip()
+    return ip
+
+def get_mac_addr() -> str:
+    """获取 MAC 地址
+    Returns:
+        str: MAC 地址
+    """
+    mac = _run("cat /sys/class/net/$(ip ro |awk 'NR==1{print $5}')/address").strip()
+    return mac
+
+def get_host_name() -> str:
+    """获取主机名
+    Returns:
+        str: _description_
+    """
+    # name = socket.gethostname()
+    name = _run("hostname").strip()
+    return name
+
+def get_serial_num() -> str:
+    """获取服务器序列号
+    Returns:
+        str: _description_
+    """
+    sn = _run("dmidecode -s system-serial-number").strip()
+    return sn
+
+def get_product_name() -> str:
+    """获取服务器的型号
+    Returns:
+        str: _description_
+    """
+    pn = _run("dmidecode -s system-product-name")
+    return pn
 
 def get_linux_cpu() -> Dict[str, Any]:
 
@@ -49,7 +94,8 @@ def get_linux_cpu() -> Dict[str, Any]:
         if (len(cpu_id_m)):
             cpu_used = round(100 - float(cpu_id_m[0]), 2)
 
-    cpu_core = int(_run('grep -c "model name" /proc/cpuinfo').split('\n')[0])
+    # cpu_core = int(_run('grep -c "model name" /proc/cpuinfo').split('\n')[0])
+    cpu_core = int(_run('cat /proc/cpuinfo |grep processor |wc -l').strip())
 
     return {
         "used": cpu_used, # cpu使用率
@@ -116,8 +162,6 @@ def get_linux_disk(path:str = '/') -> Dict[str, Any]:
 
     return result
 
-def get_local_ip() -> str:
-    return socket.gethostbyname(socket.gethostname())
 
 def GetHostInfo() -> Dict[str, Any]:
     name = socket.gethostname()
