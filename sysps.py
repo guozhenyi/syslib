@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-@name: sys util
+@name: sys info
 @author: guozhenyi
 @date: 2024-04-03
 @version: 0.1
